@@ -1,76 +1,63 @@
 const fetch = require('node-fetch');
 
 export default async function handler(req, res) {
-  const { fromCurrency, toCurrency, amount, list } = req.query;
-  const apiKey = process.env.ExchangeRateAPI;
-  
-  if (!apiKey) {
-    return res.status(500).json({ error: 'API key is missing' });
-  }
+    const { fromCurrency, toCurrency, amount, list } = req.query;
 
-  // If the query parameter "list" is set to true, return the currency list.
-  if (list === 'true') {
-    try {
-      // Try using the primary endpoint from ExchangeRate-API
-      const primaryListUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/USD`;
-      const primaryResponse = await fetch(primaryListUrl);
-      const primaryData = await primaryResponse.json();
-      console.log('Primary currency list response:', primaryData);
-      
-      if (primaryData.result === 'success' && primaryData.conversion_rates) {
-        const currencies = Object.keys(primaryData.conversion_rates);
-        return res.status(200).json({ currencies });
-      } else {
-        // If primary endpoint doesn't return success, throw an error to trigger fallback
-        throw new Error('Primary endpoint failed');
-      }
-    } catch (error) {
-      console.error('Primary currency list fetch error:', error);
-      // Fallback endpoint using ExchangeRate.host
-      try {
-        const altListUrl = 'https://api.exchangerate.host/symbols';
-        const altResponse = await fetch(altListUrl);
-        const altData = await altResponse.json();
-        console.log('Alternate currency list response:', altData);
-        
-        if (!altData.symbols) {
-          return res.status(500).json({ error: 'Unable to fetch currency list from fallback endpoint.' });
+    // Check if 'list=true' is passed in the query
+    if (list === 'true') {
+        try {
+            // Fetch the list of supported currencies
+            const currencyListUrl = 'https://api.exchangerate.host/symbols'; // This API returns a list of supported currencies
+            const response = await fetch(currencyListUrl);
+            const data = await response.json();
+            
+            // Return the list of supported currencies
+            return res.status(200).json(data);
+        } catch (error) {
+            console.error('Error fetching currency list:', error);
+            return res.status(500).json({ error: 'Failed to fetch currency list' });
         }
-        
-        const currencies = Object.keys(altData.symbols);
-        return res.status(200).json({ currencies });
-      } catch (altError) {
-        console.error('Alternate currency list fetch error:', altError);
-        return res.status(500).json({ error: 'Unable to fetch currency list from fallback endpoint.' });
-      }
     }
-  }
 
-  // If we're not fetching the list, we proceed with the conversion.
-  if (!fromCurrency || !toCurrency || !amount) {
-    return res.status(400).json({ error: 'Missing parameters' });
-  }
+    // If 'list=true' is not passed, proceed with conversion logic
+    if (!fromCurrency || !toCurrency || !amount) {
+        return res.status(400).json({ error: 'Missing parameters' });
+    }
 
-  try {
-    // Fetch the exchange rates for the base currency (fromCurrency)
-    const conversionUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
-    const conversionResponse = await fetch(conversionUrl);
-    const conversionData = await conversionResponse.json();
-    
-    if (conversionData.result !== 'success') {
-      return res.status(500).json({ error: 'Failed to fetch exchange rates' });
+    const apiKey = process.env.ExchangeRateAPI;
+
+    if (!apiKey) {
+        return res.status(500).json({ error: 'API key is missing' });
     }
-    
-    // Validate that the target currency exists
-    if (!(toCurrency in conversionData.conversion_rates)) {
-      return res.status(400).json({ error: 'Invalid currency code' });
+
+    // Fetch the list of currencies (for validation)
+    const currencyListUrl = `https://openexchangerates.org/api/currencies.json`;
+    const currencyListResponse = await fetch(currencyListUrl);
+    const currencyListData = await currencyListResponse.json();
+
+    // Check if both fromCurrency and toCurrency are valid
+    if (!(fromCurrency in currencyListData) || !(toCurrency in currencyListData)) {
+        return res.status(400).json({ error: 'Invalid currency code' });
     }
-    
-    const rate = conversionData.conversion_rates[toCurrency];
+
+    // Fetch the exchange rates for the fromCurrency
+    const apiUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
+    const exchangeRatesResponse = await fetch(apiUrl);
+    const exchangeRatesData = await exchangeRatesResponse.json();
+
+    if (exchangeRatesData.result !== 'success') {
+        return res.status(500).json({ error: 'Failed to fetch exchange rates' });
+    }
+
+    // Get the conversion rate for the target currency
+    const rate = exchangeRatesData.conversion_rates[toCurrency];
+    if (!rate) {
+        return res.status(400).json({ error: 'Invalid currency code' });
+    }
+
+    // Calculate the converted amount
     const convertedAmount = (amount * rate).toFixed(2);
+
+    // Respond with the converted amount
     return res.status(200).json({ convertedAmount });
-  } catch (error) {
-    console.error('Exchange rate fetch error:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
 }
