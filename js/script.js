@@ -5,22 +5,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDiv = document.getElementById('result');
     const form = document.getElementById('converter-form');
 
-    // Fetch the list of available currencies dynamically from the API
-    fetch('https://v6.exchangerate-api.com/v6/YOUR_API_KEY/codes') // Replace YOUR_API_KEY with the actual API key
+    // Fetch the list of currencies from your API endpoint.
+    fetch('/api/convert?list=true')
         .then(response => response.json())
         .then(data => {
-            if (data.result === 'success') {
-                const currencies = Object.keys(data.supported_codes); // List of supported currencies
-                // Populate the currency select options dynamically
-                currencies.forEach(currency => {
+            if (data.currencies) {
+                // data.currencies is an object with keys as currency codes and values as names.
+                Object.keys(data.currencies).forEach(currency => {
                     const optionFrom = document.createElement('option');
                     optionFrom.value = currency;
-                    optionFrom.textContent = currency;
+                    optionFrom.textContent = `${currency} - ${data.currencies[currency]}`;
                     fromCurrencySelect.appendChild(optionFrom);
 
                     const optionTo = document.createElement('option');
                     optionTo.value = currency;
-                    optionTo.textContent = currency;
+                    optionTo.textContent = `${currency} - ${data.currencies[currency]}`;
                     toCurrencySelect.appendChild(optionTo);
                 });
             } else {
@@ -32,23 +31,20 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Error:', error);
         });
 
-    // Handle form submission
+    // Handle form submission for currency conversion.
     form.addEventListener('submit', function (e) {
-        e.preventDefault();  // Prevent the form from submitting normally
+        e.preventDefault();
 
         const amount = amountInput.value;
         const fromCurrency = fromCurrencySelect.value;
         const toCurrency = toCurrencySelect.value;
 
-        // Check if all inputs are filled
         if (amount && fromCurrency && toCurrency) {
-            // Send a request to the Vercel API route
             fetch(`/api/convert?fromCurrency=${fromCurrency}&toCurrency=${toCurrency}&amount=${amount}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.convertedAmount) {
-                        // Display the converted amount
-                        resultDiv.innerHTML = `${amount} ${fromCurrency} = ${(parseFloat(data.convertedAmount)).toFixed(2)} ${toCurrency}`;
+                        resultDiv.innerHTML = `${amount} ${fromCurrency} = ${parseFloat(data.convertedAmount).toFixed(2)} ${toCurrency}`;
                     } else {
                         resultDiv.innerHTML = 'Error: Conversion failed.';
                     }
@@ -58,7 +54,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error('Error:', error);
                 });
         } else {
-            // Display a message if any fields are empty
             resultDiv.innerHTML = 'Please enter a valid amount and select both currencies.';
         }
     });
