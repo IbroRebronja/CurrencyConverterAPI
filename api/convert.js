@@ -1,29 +1,30 @@
 export default async function handler(req, res) {
-    const { fromCurrency, toCurrency, amount } = req.query;
+    const { fromCurrency, toCurrency, amount, list } = req.query;
 
+    if (list === 'true') {
+        // Fetch the list of currencies
+        const currencyListUrl = `https://openexchangerates.org/api/currencies.json`;
+        try {
+            const currencyListResponse = await fetch(currencyListUrl);
+            const currencyListData = await currencyListResponse.json();
+            return res.status(200).json(currencyListData);  // Return the list of currencies
+        } catch (error) {
+            return res.status(500).json({ error: 'Failed to fetch currency list', details: error.message });
+        }
+    }
+
+    // If not 'list=true', process currency conversion
     if (!fromCurrency || !toCurrency || !amount) {
         return res.status(400).json({ error: 'Missing parameters' });
     }
 
     const apiKey = process.env.ExchangeRateAPI;
-
     if (!apiKey) {
         return res.status(500).json({ error: 'API key is missing' });
     }
 
     try {
-        // Dynamically import node-fetch for ES module compatibility
         const { default: fetch } = await import('node-fetch');
-        
-        // Fetch the list of currencies
-        const currencyListUrl = `https://openexchangerates.org/api/currencies.json`;
-        const currencyListResponse = await fetch(currencyListUrl);
-        const currencyListData = await currencyListResponse.json();
-
-        // Check if both fromCurrency and toCurrency are valid
-        if (!(fromCurrency in currencyListData) || !(toCurrency in currencyListData)) {
-            return res.status(400).json({ error: 'Invalid currency code' });
-        }
 
         // Fetch the exchange rates for the fromCurrency
         const apiUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
