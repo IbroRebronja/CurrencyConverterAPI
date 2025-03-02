@@ -1,0 +1,15 @@
+{
+    "name": "currency-converter",
+    "version": "1.0.0",
+    "description": "Currency conversion API",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    },
+    "dependencies": {
+        "node-fetch": "^2.7.0"
+    },
+    "engines": {
+        "node": "14.x"
+    }
+}
