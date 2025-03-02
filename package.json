@@ -4,12 +4,13 @@
     "description": "Currency conversion API",
     "main": "index.js",
     "scripts": {
-        "start": "node index.js"
+      "start": "node index.js"
     },
     "dependencies": {
-        "node-fetch": "^3.0.0"
+      "node-fetch": "^3.0.0"
     },
     "engines": {
-        "node": "22.x"
+      "node": "22.x"
     }
-}
+  }
+  
