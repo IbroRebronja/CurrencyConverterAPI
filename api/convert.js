@@ -1,5 +1,3 @@
-// api/convert.js
-
 const fetch = require('node-fetch');
 
 export default async function handler(req, res) {
@@ -11,7 +9,15 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing parameters' });
     }
 
-    const apiKey = process.env.ExchangeRateAPI; // Make sure the API key is accessed correctly from the environment variables
+    // Access API key from environment variables
+    const apiKey = process.env.ExchangeRateAPI;  // Correct way to access the environment variable in Vercel
+
+    // Check if the API key is defined
+    if (!apiKey) {
+        return res.status(500).json({ error: 'API key is missing' });
+    }
+
+    // Construct the API URL with the key
     const apiUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/latest/${fromCurrency}`;
 
     try {
