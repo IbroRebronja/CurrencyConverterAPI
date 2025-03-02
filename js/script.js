@@ -1,27 +1,65 @@
-document.getElementById('converter-form').addEventListener('submit', function(e) {
-    e.preventDefault();
+document.addEventListener('DOMContentLoaded', () => {
+    const amountInput = document.getElementById('amount');
+    const fromCurrencySelect = document.getElementById('from-currency');
+    const toCurrencySelect = document.getElementById('to-currency');
+    const resultDiv = document.getElementById('result');
+    const form = document.getElementById('converter-form');
 
-    let amount = document.getElementById('amount').value;
-    let fromCurrency = document.getElementById('from-currency').value;
-    let toCurrency = document.getElementById('to-currency').value;
+    // Fetch the list of available currencies dynamically from the API
+    fetch('https://v6.exchangerate-api.com/v6/YOUR_API_KEY/codes') // Replace YOUR_API_KEY with the actual API key
+        .then(response => response.json())
+        .then(data => {
+            if (data.result === 'success') {
+                const currencies = Object.keys(data.supported_codes); // List of supported currencies
+                // Populate the currency select options dynamically
+                currencies.forEach(currency => {
+                    const optionFrom = document.createElement('option');
+                    optionFrom.value = currency;
+                    optionFrom.textContent = currency;
+                    fromCurrencySelect.appendChild(optionFrom);
 
-    // Hardcoded exchange rates (you can replace with API data later)
-    const exchangeRates = {
-        'USD': { 'EUR': 0.92, 'GBP': 0.75, 'JPY': 134.5, 'AUD': 1.48 },
-        'EUR': { 'USD': 1.09, 'GBP': 0.82, 'JPY': 146.5, 'AUD': 1.61 },
-        'GBP': { 'USD': 1.33, 'EUR': 1.22, 'JPY': 178.6, 'AUD': 1.96 },
-        'JPY': { 'USD': 0.0074, 'EUR': 0.0068, 'GBP': 0.0056, 'AUD': 0.011 },
-        'AUD': { 'USD': 0.68, 'EUR': 0.62, 'GBP': 0.51, 'JPY': 91.5 },
-    };
+                    const optionTo = document.createElement('option');
+                    optionTo.value = currency;
+                    optionTo.textContent = currency;
+                    toCurrencySelect.appendChild(optionTo);
+                });
+            } else {
+                resultDiv.innerHTML = 'Error: Failed to fetch currency list.';
+            }
+        })
+        .catch(error => {
+            resultDiv.innerHTML = 'Error: Unable to fetch currency list.';
+            console.error('Error:', error);
+        });
 
-    // Calculate conversion
-    if (amount && fromCurrency && toCurrency) {
-        let rate = exchangeRates[fromCurrency][toCurrency];
-        let convertedAmount = (amount * rate).toFixed(2);
+    // Handle form submission
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();  // Prevent the form from submitting normally
 
-        // Show result
-        document.getElementById('result').innerHTML = `${amount} ${fromCurrency} = ${convertedAmount} ${toCurrency}`;
-    } else {
-        document.getElementById('result').innerHTML = 'Please enter a valid amount and select currencies.';
-    }
+        const amount = amountInput.value;
+        const fromCurrency = fromCurrencySelect.value;
+        const toCurrency = toCurrencySelect.value;
+
+        // Check if all inputs are filled
+        if (amount && fromCurrency && toCurrency) {
+            // Send a request to the Vercel API route
+            fetch(`/api/convert?fromCurrency=${fromCurrency}&toCurrency=${toCurrency}&amount=${amount}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.convertedAmount) {
+                        // Display the converted amount
+                        resultDiv.innerHTML = `${amount} ${fromCurrency} = ${(parseFloat(data.convertedAmount)).toFixed(2)} ${toCurrency}`;
+                    } else {
+                        resultDiv.innerHTML = 'Error: Conversion failed.';
+                    }
+                })
+                .catch(error => {
+                    resultDiv.innerHTML = 'Error: Unable to fetch conversion rates.';
+                    console.error('Error:', error);
+                });
+        } else {
+            // Display a message if any fields are empty
+            resultDiv.innerHTML = 'Please enter a valid amount and select both currencies.';
+        }
+    });
 });
