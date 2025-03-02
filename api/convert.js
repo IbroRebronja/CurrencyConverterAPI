@@ -1,25 +1,8 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
 export default async function handler(req, res) {
-    const { fromCurrency, toCurrency, amount, list } = req.query;
+    const { fromCurrency, toCurrency, amount } = req.query;
 
-    // Check if 'list=true' is passed in the query
-    if (list === 'true') {
-        try {
-            // Fetch the list of supported currencies
-            const currencyListUrl = 'https://api.exchangerate.host/symbols'; // This API returns a list of supported currencies
-            const response = await fetch(currencyListUrl);
-            const data = await response.json();
-            
-            // Return the list of supported currencies
-            return res.status(200).json(data);
-        } catch (error) {
-            console.error('Error fetching currency list:', error);
-            return res.status(500).json({ error: 'Failed to fetch currency list' });
-        }
-    }
-
-    // If 'list=true' is not passed, proceed with conversion logic
     if (!fromCurrency || !toCurrency || !amount) {
         return res.status(400).json({ error: 'Missing parameters' });
     }
@@ -30,7 +13,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'API key is missing' });
     }
 
-    // Fetch the list of currencies (for validation)
+    // Fetch the list of currencies
     const currencyListUrl = `https://openexchangerates.org/api/currencies.json`;
     const currencyListResponse = await fetch(currencyListUrl);
     const currencyListData = await currencyListResponse.json();
