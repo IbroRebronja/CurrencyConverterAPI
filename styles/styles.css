@@ -5,49 +5,83 @@
 }
 
 body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background-color: #f4f4f4;
+    font-family: 'Arial', sans-serif;
+    background: #f4f4f9;
+    color: #333;
+    line-height: 1.6;
 }
 
 .container {
-    text-align: center;
-    background: white;
-    padding: 30px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 90%;
+    max-width: 600px;
+    margin: 50px auto;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #4CAF50;
     margin-bottom: 20px;
 }
 
 form {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    gap: 15px;
 }
 
-input, select, button {
-    margin: 10px 0;
+input[type="number"],
+select,
+button {
     padding: 10px;
-    width: 200px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+input[type="number"],
+select {
+    width: 100%;
 }
 
 button {
-    background-color: #4CAF50;
+    background: #4CAF50;
     color: white;
-    border: none;
     cursor: pointer;
+    transition: background 0.3s ease;
+    border: none;
 }
 
 button:hover {
-    background-color: #45a049;
+    background: #45a049;
 }
 
+/* Result */
 #result {
     margin-top: 20px;
-    font-size: 1.2em;
+    padding: 15px;
+    background: #f1f1f1;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+@media screen and (max-width: 600px) {
+    .container {
+        width: 95%;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    input[type="number"],
+    select,
+    button {
+        font-size: 0.9rem;
+    }
 }
