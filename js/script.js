@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 optionFrom.value = currency;
                 optionFrom.textContent = `${currency}: ${data[currency]}`;
                 fromCurrencySelect.appendChild(optionFrom);
-
+// should work now
                 const optionTo = document.createElement('option');
                 optionTo.value = currency;
                 optionTo.textContent = `${currency}: ${data[currency]}`;
