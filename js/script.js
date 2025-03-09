@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const toCurrencySelect = document.getElementById('to-currency');
     const resultDiv = document.getElementById('result');
     const form = document.getElementById('converter-form');
-    const apiUrl = "https://currency-converter-api-gamma.vercel.app//api/convert?list=true"
+    const apiUrl = "https://currency-converter-api-gamma.vercel.app/api/convert?list=true"
   
     fetch(apiUrl)
     .then(response => response.json())
