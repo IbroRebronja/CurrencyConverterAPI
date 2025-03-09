@@ -4,30 +4,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const toCurrencySelect = document.getElementById('to-currency');
     const resultDiv = document.getElementById('result');
     const form = document.getElementById('converter-form');
+    const apiUrl = "https//currency-converter-api-gamma-vercel.app/api/convert?list=true"
   
-    fetch('/api/convert?list=true')
-      .then(response => response.json())
-      .then(data => {
+    fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
         if (data) {
-          data.forEach(currency => {
-            const optionFrom = document.createElement('option');
-            optionFrom.value = currency;
-            optionFrom.textContent = currency;
-            fromCurrencySelect.appendChild(optionFrom);
-  
-            const optionTo = document.createElement('option');
-            optionTo.value = currency;
-            optionTo.textContent = currency;
-            toCurrencySelect.appendChild(optionTo);
-          });
+            for (currency in data) {
+                const optionFrom = document.createElement('option');
+                optionFrom.value = `${currency}: ${data[currency]}`;
+                optionFrom.textContent = currency;
+                fromCurrencySelect.appendChild(optionFrom);
+
+                const optionTo = document.createElement('option');
+                optionTo.value = `${currency}: ${data[currency]}`;
+                optionTo.textContent = `${currency}: ${data[currency]}`;
+                toCurrencySelect.appendChild(optionTo);
+            }
         } else {
-          resultDiv.innerHTML = 'Error: Failed to fetch currency list.';
+            resultDiv.innerHTML = 'Error: Failed to fetch currency list.';
         }
-      })
-      .catch(error => {
+    })
+    .catch(error => {
         resultDiv.innerHTML = 'Error: Unable to fetch currency list.';
         console.error('Error:', error);
-      });
+    });
   
     form.addEventListener('submit', function (e) {
       e.preventDefault();
