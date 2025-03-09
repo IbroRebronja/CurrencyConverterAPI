@@ -13,12 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
             for (currency in data) {
                 const optionFrom = document.createElement('option');
                 optionFrom.value = currency;
-                optionFrom.textContent = currency;
+                optionFrom.textContent = `${currency}: ${data[currency]}`;
                 fromCurrencySelect.appendChild(optionFrom);
 
                 const optionTo = document.createElement('option');
                 optionTo.value = currency;
-                optionTo.textContent = currency;
+                optionTo.textContent = `${currency}: ${data[currency]}`;
                 toCurrencySelect.appendChild(optionTo);
             }
         } else {
