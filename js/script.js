@@ -5,12 +5,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultDiv = document.getElementById('result');
     const form = document.getElementById('converter-form');
   
-    // Fetch the list of available currencies from our API endpoint.
     fetch('/api/convert?list=true')
       .then(response => response.json())
       .then(data => {
-        if (data.currencies) {
-          data.currencies.forEach(currency => {
+        if (data) {
+          data.forEach(currency => {
             const optionFrom = document.createElement('option');
             optionFrom.value = currency;
             optionFrom.textContent = currency;
@@ -30,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
         console.error('Error:', error);
       });
   
-    // Handle form submission for conversion.
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       const amount = amountInput.value;
